@@ -28,8 +28,10 @@ export default function Home() {
   // tailwind classes for layout and style
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      {/* title*/}
-      <h1 className="text-3xl font-bold text-purple-700 mb-4">
+      
+      
+      {/* Champions of Cleverslogan*/}
+      <h1 className="text-3xl font-bold text-[var(--accent-green)] mb-4">
         Smart Waste AI
       </h1>
 
@@ -38,7 +40,9 @@ export default function Home() {
 
       {/* testing out a button interactivity */}
       <button
-        className="mt-6 px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+        className="bg-[var(--primary-green)] hover:bg-[var(--accent-green)] 
+                   text-white px-6 py-3 rounded-lg 
+                   transition-colors duration-200"
         onClick={() => setMessage("You clicked the button!")}
       >
         Click Me
