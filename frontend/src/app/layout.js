@@ -11,16 +11,14 @@ export default function RootLayout({ children }) {
     <html lang="en">
       {/* global font and background */}
       <body className="min-h-screen bg-gray-50 text-gray-900 font-sans pt-20">
-       
-       
         {/* header */}
         <header className=" fixed top-0 left-0 right-0 z-50 bg-white shadow-lg p-4 flex items-center justify-start gap-6">
           <img
-          src="/project_logo.png"
-              alt="Project logo"
-              className="w-14 h-14"
+            src="/project_logo.png"
+            alt="Project logo"
+            className="w-14 h-14"
           ></img>
-          
+
           <h1 className="text-3xl font-semibold text-[var(--accent-green)]">
             Smart Waste AI
           </h1>

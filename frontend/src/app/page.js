@@ -5,48 +5,76 @@
 // Import React to access to React's hooks (useState, useEffect)
 import React, { useState, useEffect } from "react";
 
+// importing icons from react-icons
+import { AiOutlineVideoCamera } from "react-icons/ai";
+import { LuBrainCircuit } from "react-icons/lu";
+import { BiCategoryAlt } from "react-icons/bi";
+
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
-  // useState remembers data between re-renders.
-  // variable that causes the screen to update when changed.
-  const [message, setMessage] = useState("Welcome to Smart Waste AI!");
-
-  // useEffect lets us run code after the page first loads
-  // update the message after 3 seconds
-  useEffect(() => {
-    // setTimeout runs function after 3000 ms
-    const timer = setTimeout(() => {
-      setMessage("Ready to build your first feature!");
-    }, 3000);
-
-    // return a cleanup function to stop the timer if the component is removed
-    return () => clearTimeout(timer);
-  }, []); // empty array [] means this effect runs only once (on page load)
-
   // this return section below is what gets rendered on the page
   // tailwind classes for layout and style
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      
-      
-      {/* Champions of Cleverslogan*/}
-      <h1 className="text-3xl font-bold text-[var(--accent-green)] mb-4">
-        Smart Waste AI
-      </h1>
+      {/* section for intro with slogan and quick tagline*/}
+      <section id="intro" className="text-center p-12 mb-20">
+        {/* Slogan*/}
+        <h1 className="text-5xl font-bold text-[var(--accent-green)] mb-4">
+          Smart Sorting for Sustainable Living
+        </h1>
 
-      {/* display the message */}
-      <p className="text-lg text-gray-700">{message}</p>
+        {/* Quick Project Description*/}
+        <p className="font-bold text-[var(--accent-green)]">
+          Helping communities with AI-driven waste classification for a cleaner,
+          greener future.
+        </p>
+      </section>
 
-      {/* testing out a button interactivity */}
-      <button
-        className="bg-[var(--primary-green)] hover:bg-[var(--accent-green)] 
-                   text-white px-6 py-3 rounded-lg 
-                   transition-colors duration-200"
-        onClick={() => setMessage("You clicked the button!")}
-      >
-        Click Me
-      </button>
+      {/*How does it work? */}
+      <section>
+        <h2 className="text-3xl text-center font-bold text-[var(--accent-green)] mb-4">
+          How It Works
+        </h2>
+
+        <p className="text-center font-bold text-[var(--accent-green)] mb-4">
+          Our Smart Waste Ai project uses a simple pipeline to classify waste in
+          real-time
+        </p>
+
+        {/*React icons for how does it work section */}
+        <section className="flex flex-wrap justify-center py-5 gap-12">
+          <div className="flex flex-col items-center text-center rounded-md bg-white shadow-md p-6 hover:scale-105 transition-transform duration-300">
+            <AiOutlineVideoCamera
+              size={80}
+              className="text-[var(--primary-green)]"
+            ></AiOutlineVideoCamera>
+            <h3 className="font-bold text-[var(--accent-green)] mb-4">
+              Capture Camera Feed
+            </h3>
+          </div>
+
+          <div className="flex flex-col items-center text-center rounded-md bg-white shadow-md p-6 hover:scale-105 transition-transform duration-300">
+            <LuBrainCircuit
+              size={80}
+              className="text-[var(--primary-green)]"
+            ></LuBrainCircuit>
+            <h3 className="font-bold text-[var(--accent-green)] mb-4">
+              ML Analyzing Data
+            </h3>
+          </div>
+
+          <div className="flex flex-col items-center text-center rounded-md bg-white shadow-md p-6 hover:scale-105 transition-transform duration-300">
+            <BiCategoryAlt
+              size={80}
+              className="text-[var(--primary-green)]"
+            ></BiCategoryAlt>
+            <h3 className="font-bold text-[var(--accent-green)] mb-4">
+              Classify and Display Results
+            </h3>
+          </div>
+        </section>
+      </section>
     </div>
   );
 }
