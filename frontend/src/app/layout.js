@@ -1,16 +1,30 @@
+// importing the global css code
 import "./globals.css";
+// importing the dashboard front from Google Fonts
+import { Saira } from "next/font/google";
+
+// setting up function for the imported font
+const saira = Saira ({
+subsets: ['latin'],
+weight: ["400", "600", "700"],
+variable: '--font-saira',
+});
+
 // browser tab and search engine metadata
 export const metadata = {
   title: "Smart Waste AI",
   description: "AI-powered waste classification system using edge devices",
 };
 
+
+
+
 // RootLayout wraps all webpages
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className = {saira.className}>
       {/* global font and background */}
-      <body className="min-h-screen bg-gray-50 text-gray-900 font-sans pt-20">
+      <body className="min-h-screen bg-white text-gray-900 pt-20">
         {/* header */}
         <header className=" fixed top-0 left-0 right-0 z-50 bg-white shadow-lg p-4 flex items-center justify-start gap-6">
           <img
