@@ -52,7 +52,7 @@ export default function Home() {
           </h1>
 
           {/* Quick Project Description*/}
-          <p className="font-bold text-accent-green py-4">
+          <p className="text-3xl font-bold text-accent-green py-4">
             Helping communities with AI-driven waste classification for a
             cleaner, greener future.
           </p>
@@ -63,7 +63,7 @@ export default function Home() {
       <section className="text-primary-green mx-auto py-4">
         <h2 className=" text-4xl text-center font-bold py-5">How It Works</h2>
 
-        <p className="text-center font-bold">
+        <p className="text-xl text-center font-bold">
           Our Smart Waste Ai project uses a simple pipeline to classify waste in
           real-time
         </p>
