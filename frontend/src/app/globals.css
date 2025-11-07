@@ -1,22 +1,39 @@
+/* import all styles, components and utilities from Tailwind */
 @import "tailwindcss";
 
+/* :root is a global object for CSS variables
+each --name creates a reusable variable that can be referenced anywhere as var(--name)
+*/
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary-green: #2D5016;
-  --accent-green: #4A7C2C;
+  --primary-green: #386917;
+  --accent-green: #58a32d;
   --light-green: #ccebce;
   --light-blue: #73afeb;
-
 }
 
+/* removes default padding and margins that browsers add to ensure colours remain solid if CSS variables break */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* allows Tailwind utilities like bg-background or text-foreground
+to reference the CSS variables we set in :root */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary-green: var(--primary-green);
+  --color-accent-green: var(--accent-green);
+  --color-light-green: var(--light-green);
+  --color-light-blue: var(--light-blue);
 }
 
+/* this is for dark mode overriding to ensure the website is still viewable */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -24,8 +41,16 @@
   }
 }
 
+/* this is how the variables are used in the body
+it sets the global text colour and overflow prevents accidental horizontal scrollbars when layout widths misalign
+*/
 body {
   background: var(--background);
   color: var(--foreground);
-  /* font-family: Arial, Helvetica, sans-serif;*/
+  overflow-x: hidden;
+}
+
+/* ensures html itself also has no gaps or black edges */
+html {
+  background: var(--background);
 }
