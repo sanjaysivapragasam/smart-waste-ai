@@ -16,10 +16,14 @@
  for things that affect UI */
 import { useEffect, useRef, useState } from "react";
 
-export default function CameraPreview() {
+// adding a parameter video ref so page.js can pass in a videoRef
+// detection overlay will still need access to the same video element
+// to draw on top of it
+export default function CameraPreview({videoRef: externalVideoRef}) {
   // creates a reference object where current = null
   // its a DOM ref for the <video> element where the stream will play
-  const videoRef = useRef(null);
+  // use the parameter or the standalone if no ref is passed
+  const videoRef = externalVideoRef || useRef(null);
   // a stream reference object accessible by all methods
   // useRef persists across renders. It holds the active MediaStream
   const streamRef = useRef(null);

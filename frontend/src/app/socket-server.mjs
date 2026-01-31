@@ -18,11 +18,23 @@ const io = new Server(httpServer, {
 //handles incoming socket connections from client(s) (page.js)
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
-    // forward any data received from microservice to connected client(s)
-    socket.on("update", (data) => {
-      console.log("Received from microservice:", data);
-      io.emit("update", data); // broadcast to all clients including frontend
-    });
+  // forward any data received from microservice to connected client(s)
+  socket.on("update", (data) => {
+    console.log("Received from microservice:", data);
+    io.emit("update", data); // broadcast to all clients including frontend
+  });
+
+  // forward video frames from Python to all connected clients
+  socket.on("frame", (data) => {
+    console.log("Received frame:", data?.image?.length, "bytes");
+    io.emit("frame", data);
+  });
+
+  // (optional for later) forward bbox coordinate packets for overlay mode
+  socket.on("detections", (data) => {
+    console.log("Received detections:", data?.detections?.length ?? 0);
+    io.emit("detections", data);
+  });
 
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);

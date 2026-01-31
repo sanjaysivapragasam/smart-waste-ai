@@ -17,18 +17,24 @@ import { MdCompost } from "react-icons/md";
 import { BsTrash3 } from "react-icons/bs";
 import { TbArrowBigRightLines } from "react-icons/tb";
 
-
 // importing the camera component created for the computer vison
 import CameraPreview from "./components/CameraPreview";
 import PythonStreamView from "./components/PythonStreamView";
 import DetectionOverlay from "./components/DetectionOverlay";
-
 
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
   // state to hold real-time updates from ML model
   const [updates, setUpdates] = useState([]);
+
+  // State to control which visualization mode we're using
+  // "browser-camera" = CameraPreview with overlay
+  // "python-stream" = PythonStreamView with frames sent over network
+  const [displayMode, setDisplayMode] = useState("browser-camera");
+
+  // reference to the video element for drawing boxes on top
+  const videoRef = useRef(null);
 
   // useEffect to set up WebSocket connection on component mount
   useEffect(() => {
@@ -254,11 +260,53 @@ export default function Home() {
         {/*Video Feed Placeholder*/}
         <section className="mt-8 text-center flex justify-center py-20">
           <div className="w-[640px] border rounded shadow-lg px-4 py-12 mb-5">
+            {/* Mode Toggle Buttons */}
+            <div className="flex gap-2 mb-6 justify-center">
+              <button
+                onClick={() => setDisplayMode("browser-camera")}
+                className={`px-4 py-2 rounded font-semibold transition-all ${
+                  displayMode === "browser-camera"
+                    ? "bg-accent-green text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                Browser Camera Mode
+              </button>
+              <button
+                onClick={() => setDisplayMode("python-stream")}
+                className={`px-4 py-2 rounded font-semibold transition-all ${
+                  displayMode === "python-stream"
+                    ? "bg-accent-green text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                Python Stream Mode
+              </button>
+            </div>
+
+            {/* Title changes based on mode */}
             <p className="text-gray-400 text-xl mb-4">
-              Live Video Feed Placeholder
+              {displayMode === "browser-camera"
+                ? "Browser Camera + AI Overlay"
+                : "Python YOLO Stream"}
             </p>
 
-            <CameraPreview />
+            {/* Show different components based on mode */}
+            {displayMode === "browser-camera" ? (
+              //  Browser Camera with Detection Overlay
+              //  canvas overlay on top
+              <div className="relative">
+                {/* Your original CameraPreview component */}
+                <CameraPreview videoRef={videoRef} />
+
+                {/* Canvas overlay that draws detection boxes on top */}
+                <DetectionOverlay videoRef={videoRef} />
+              </div>
+            ) : (
+              // MODE 2: Python Stream View
+              // This shows frames directly from Python (with boxes already drawn)
+              <PythonStreamView />
+            )}
 
             {/* <video
               src="/Placeholder_video.mp4"
