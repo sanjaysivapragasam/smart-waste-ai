@@ -3,7 +3,7 @@
 "use client";
 
 // Import React to access to React's hooks (useState, useEffect)
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Import socket.io client library
 import { io } from "socket.io-client";
@@ -20,6 +20,8 @@ import { TbArrowBigRightLines } from "react-icons/tb";
 
 // importing the camera component created for the computer vison
 import CameraPreview from "./components/CameraPreview";
+import PythonStreamView from "./components/PythonStreamView";
+import DetectionOverlay from "./components/DetectionOverlay";
 
 
 // main React component for the homepage
