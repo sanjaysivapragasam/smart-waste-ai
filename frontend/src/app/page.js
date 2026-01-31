@@ -17,6 +17,11 @@ import { MdCompost } from "react-icons/md";
 import { BsTrash3 } from "react-icons/bs";
 import { TbArrowBigRightLines } from "react-icons/tb";
 
+
+// importing the camera component created for the computer vison
+import CameraPreview from "./components/CameraPreview";
+
+
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
@@ -250,12 +255,15 @@ export default function Home() {
             <p className="text-gray-400 text-xl mb-4">
               Live Video Feed Placeholder
             </p>
-            <video
+
+            <CameraPreview />
+
+            {/* <video
               src="/Placeholder_video.mp4"
               controls
               muted
               className="w-full h-auto rounded"
-            ></video>
+            ></video> */}
           </div>
         </section>
 
