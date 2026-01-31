@@ -35,8 +35,16 @@ def connect():
 def disconnect():
     print("Disconnected from Socket.IO server")
 
-# Connect once at startup
-sio.connect(SOCKET_SERVER_URL)
+# added a try statement to prevent crashing
+# if the socket.io server wasn't running
+try:
+   # Connect once at startup
+    sio.connect(SOCKET_SERVER_URL) 
+except Exeception as e:
+    print(f"Warning: Could not connect to Socket.IO server: {e}")
+    print("  Make sure the Node.js server is running on port 4000")
+    
+
 
 # Canonical class -> bin mapping (your Option A mapping)
 ITEM_TO_BIN = {
@@ -58,8 +66,14 @@ def send_inference_result(waste_type, confidence):
         "waste_type": waste_type,
         "confidence": confidence
     }
-    print("Sent data:", data) # testing
-    sio.emit("update", data)  # emit to all connected clients
+    # implementing a try statement for error
+    # handling so even if the socket.Io fails
+    # the script won't crash
+    try:
+        sio.emit("update", data)  # emit to all connected clients
+        print("Sent data:", data) # testing
+    except Exception as e:
+        print(f"Failed to send data: {e}")
 
 # -------------------------------
 # MAIN
@@ -79,6 +93,9 @@ def main():
     prev_time = time.time()
     fps = 0.0
 
+    print("System is now ready")
+    print("  - OpenCV window shows detections")
+    print("  - Browser shows real-time updates")
     print("Press 'q' to quit.")
 
     while True:
@@ -153,6 +170,7 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+    # sio.disconnect
 
 
 if __name__ == "__main__":
