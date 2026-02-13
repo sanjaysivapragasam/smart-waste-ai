@@ -1,18 +1,11 @@
 """
-realtime_detect_stream.py
-
 This script sends FULL VIDEO FRAMES (with YOLO detections already drawn) to the browser.
-This is "Option 1" - simpler architecture but higher latency.
-
 TRADEOFF vs realtime_detect.py:
 - PRO: Simpler (one camera source, browser just displays what it receives)
 - PRO: Browser sees exactly what Python sees
 - CON: Higher latency (~200-500ms) because we send full images
 - CON: More bandwidth usage (~50KB per frame vs ~500 bytes for coordinates)
-
-Use this when: You want to demo the Python camera view, or when explaining the system architecture
 """
-
 import cv2
 import time
 from datetime import datetime
@@ -22,9 +15,8 @@ from collections import Counter
 import socketio
 import base64  # this is new for encoding images
 
-# -------------------------------
-# CONFIG
-# -------------------------------
+# config
+
 MODEL_PATH = Path("best.pt")
 
 CONF_THRES = 0.35
@@ -70,19 +62,19 @@ ITEM_TO_BIN = {
 
 def send_frame(annotated_frame):
     try:
-        print("  → Encoding frame to JPEG...")  # ADD THIS
+        print("  → Encoding frame to JPEG...") 
         _, buffer = cv2.imencode('.jpg', annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
         
-        print("  → Converting to base64...")  # ADD THIS
+        print("  → Converting to base64...")  
         frame_base64 = base64.b64encode(buffer).decode('utf-8')
         
-        print(f"  → Frame size: {len(frame_base64)} bytes")  # ADD THIS
-        print("  → Emitting to socket...")  # ADD THIS
+        print(f"  → Frame size: {len(frame_base64)} bytes") 
+        print("  → Emitting to socket...") 
         sio.emit("frame", {"image": frame_base64})
-        print("  ✓ Frame emitted successfully!")  # ADD THIS
+        print("  Frame emitted successfully!") 
         
     except Exception as e:
-        print(f"⚠ Failed to send frame: {e}")
+        print(f"Failed to send frame: {e}")
 
 def send_inference_result(waste_type, confidence):
     """
@@ -99,9 +91,7 @@ def send_inference_result(waste_type, confidence):
     except Exception as e:
         print(f"⚠ Failed to send data: {e}")
 
-# -------------------------------
-# MAIN
-# -------------------------------
+# main
 def main():
     print(f"🔧 Loading model: {MODEL_PATH}")
     model = YOLO(str(MODEL_PATH))
@@ -119,7 +109,7 @@ def main():
     prev_time = time.time()
     fps = 0.0
 
-    print("✓ System ready (STREAM MODE)!")
+    print("System ready (stream mode)!")
     print("  - OpenCV window shows detections")
     print("  - Browser receives full video frames")
     print("  - Press 'q' to quit\n")
@@ -187,12 +177,12 @@ def main():
             fps = 0.9 * fps + 0.1 * (1.0 / max(dt, 1e-6))
             cv2.putText(annotated, f"FPS: {fps:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
 
-       # NEW: Send the annotated frame to browser
-        print("Attempting to send frame...")  # ADD THIS LINE
+       # Send the annotated frame to browser
+        print("Attempting to send frame...") 
         send_frame(annotated)
-        print("Frame sent successfully!")  # ADD THIS LINE
+        print("Frame sent successfully!") 
 
-        cv2.imshow("Garbage Detection (STREAM MODE)", annotated)
+        cv2.imshow("Garbage Detection", annotated)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
