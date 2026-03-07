@@ -3,7 +3,8 @@
 "use client";
 
 // Import React to access to React's hooks (useState, useEffect)
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+// import {useRef} from "react";
 
 // Import socket.io client library
 import { io } from "socket.io-client";
@@ -18,23 +19,16 @@ import { BsTrash3 } from "react-icons/bs";
 import { TbArrowBigRightLines } from "react-icons/tb";
 
 // importing the camera component created for the computer vison
-import CameraPreview from "./components/CameraPreview";
 import PythonStreamView from "./components/PythonStreamView";
-import DetectionOverlay from "./components/DetectionOverlay";
+// commented out the below because its no longer needed
+// import CameraPreview from "./components/CameraPreview";
+// import DetectionOverlay from "./components/DetectionOverlay";
 
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
   // state to hold real-time updates from ML model
   const [updates, setUpdates] = useState([]);
-
-  // State to control which visualization mode we're using
-  // "browser-camera" = CameraPreview with overlay
-  // "python-stream" = PythonStreamView with frames sent over network
-  const [displayMode, setDisplayMode] = useState("browser-camera");
-
-  // reference to the video element for drawing boxes on top
-  const videoRef = useRef(null);
 
   // useEffect to set up WebSocket connection on component mount
   useEffect(() => {
@@ -65,12 +59,6 @@ export default function Home() {
     }
     // if its a different card, flip to this new card
   };
-
-  const wasteCategories = [
-    { id: "recycling", name: "Recycling", icon: MdRecycling, backText: "..." },
-    { id: "garbage", name: "Garbage", icon: BsTrash3, backText: "..." },
-    { id: "compost", name: "Compost", icon: MdCompost, backText: "..." },
-  ];
 
   // this return section below is what gets rendered on the page
   // tailwind classes for layout and style
@@ -257,63 +245,16 @@ export default function Home() {
           </div>
         </section>
 
-        {/*Video Feed Placeholder*/}
+        {/*Live Video Feed*/}
         <section className="mt-8 text-center flex justify-center py-20">
           <div className="w-[640px] border rounded shadow-lg px-4 py-12 mb-5">
-            {/* Mode Toggle Buttons */}
-            <div className="flex gap-2 mb-6 justify-center">
-              <button
-                onClick={() => setDisplayMode("browser-camera")}
-                className={`px-4 py-2 rounded font-semibold transition-all ${
-                  displayMode === "browser-camera"
-                    ? "bg-accent-green text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                Browser Camera Mode
-              </button>
-              <button
-                onClick={() => setDisplayMode("python-stream")}
-                className={`px-4 py-2 rounded font-semibold transition-all ${
-                  displayMode === "python-stream"
-                    ? "bg-accent-green text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                Python Stream Mode
-              </button>
-            </div>
-
-            {/* Title changes based on mode */}
+            {/* Title for the finalized live stream mode */}
             <p className="text-gray-400 text-xl mb-4">
-              {displayMode === "browser-camera"
-                ? "Browser Camera + AI Overlay"
-                : "Python YOLO Stream"}
+              Live Python YOLO Stream
             </p>
 
-            {/* Show different components based on mode */}
-            {displayMode === "browser-camera" ? (
-              //  Browser Camera with Detection Overlay
-              //  canvas overlay on top
-              <div className="relative">
-                {/* Your original CameraPreview component */}
-                <CameraPreview videoRef={videoRef} />
-
-                {/* Canvas overlay that draws detection boxes on top */}
-                <DetectionOverlay videoRef={videoRef} />
-              </div>
-            ) : (
-              // MODE 2: Python Stream View
-              // This shows frames directly from Python (with boxes already drawn)
-              <PythonStreamView />
-            )}
-
-            {/* <video
-              src="/Placeholder_video.mp4"
-              controls
-              muted
-              className="w-full h-auto rounded"
-            ></video> */}
+            {/* Displays frames directly from Python with detections already drawn */}
+            <PythonStreamView />
           </div>
         </section>
 
