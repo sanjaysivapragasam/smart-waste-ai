@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /** Next.js has 2 rendering environments, the server components and client components. Camera access is only
  * possible in the browser, so we need to tell Next.js to run this component on the client side.
  */
@@ -150,3 +151,11 @@ export default function CameraPreview({videoRef: externalVideoRef}) {
     </div>
   );
 }
+=======
+// the camera from the media API is run through the browser
+// so we need to use the client
+"use client"
+
+
+
+>>>>>>> 6073d366228abcb04d51db540938dfc1d263dd82
