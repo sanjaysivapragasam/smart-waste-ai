@@ -1,0 +1,49 @@
+from flask import Flask, request, jsonify
+import requests
+#import ensemble.py in the future to get real ML inference results
+
+
+# controls incoming and outgoing traffic across different origins (ports)
+from flask_cors import CORS
+
+import socketio
+import time
+import random
+
+# creating a Flask app
+app = Flask(__name__)
+CORS(app)
+
+# create a Socket.IO client
+sio = socketio.Client()
+
+# connect to Node.js Socket.IO server
+sio.connect("http://localhost:4000")  # Port 4000. replace with deployed server URL when possible.
+print("Connected to Socket.IO server")
+
+# sends mock ML inference results in real time
+def send_inference_result(waste_type, confidence):
+    data = {
+        "timestamp": time.time(),
+        "waste_type": waste_type,
+        "confidence": confidence
+    }
+    print("Sent data:", data) # testing
+    sio.emit("update", data)  # emit to all connected clients
+
+# simulate streaming ML results
+try:
+    while True:
+        # replace this with real ML inference results
+        send_inference_result(
+            waste_type=random.choice(["Plastic", "Paper", "Metal", "Glass", "Organic"]),
+            confidence=round(random.random(), 2)
+        )
+        time.sleep(0.2)  # sending 5 frames per second
+except KeyboardInterrupt:
+    print("Stopping real-time sender")
+    sio.disconnect()
+
+# runs the app on port 5000
+if __name__ == "__main__": 
+    app.run(port=5000, debug=True)

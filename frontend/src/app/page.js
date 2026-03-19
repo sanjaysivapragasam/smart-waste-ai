@@ -4,19 +4,50 @@
 
 // Import React to access to React's hooks (useState, useEffect)
 import React, { useState, useEffect } from "react";
+// import {useRef} from "react";
 
-// importing icons from react-icons
+// Import socket.io client library
+import { io } from "socket.io-client";
+
+// importing icons from react-icons for pipeline
 import { AiOutlineVideoCamera } from "react-icons/ai";
 import { LuBrainCircuit } from "react-icons/lu";
 import { BiCategoryAlt } from "react-icons/bi";
-import { MdRecycling } from "react-icons/md";
-import { MdCompost } from "react-icons/md";
-import { BsTrash3 } from "react-icons/bs";
 import { TbArrowBigRightLines } from "react-icons/tb";
+// importing icons for flip cards
+import { MdOutlineEco } from "react-icons/md";
+import { FaBoxOpen } from "react-icons/fa";
+import { LuGlassWater } from "react-icons/lu";
+import { GiSodaCan } from "react-icons/gi";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { TbCup } from "react-icons/tb";
+
+// importing the camera component created for the computer vison
+import PythonStreamView from "./components/PythonStreamView";
+// commented out the below because its no longer needed
+// import CameraPreview from "./components/CameraPreview";
+// import DetectionOverlay from "./components/DetectionOverlay";
 
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
+  // state to hold real-time updates from ML model
+  const [updates, setUpdates] = useState([]);
+
+  // useEffect to set up WebSocket connection on component mount
+  useEffect(() => {
+    // connects to WebSocket server
+    const socket = io("http://localhost:4000");
+
+    // listens for "update" events from server (socket-server.js)
+    socket.on("update", (data) => {
+      setUpdates((prev) => [data, ...prev].slice(0, 10)); // keep last 10 updates
+      console.log("Real-time update:", data);
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
   // creating a state for the card flip
   // these represent the different states of the card
   const [flippedCard, setFlippedCard] = useState(null);
@@ -33,217 +64,211 @@ export default function Home() {
     // if its a different card, flip to this new card
   };
 
+  // data structure representing the waste classes detected by the ML model
+  // each object contains the information required to render a flip card
   const wasteCategories = [
-    { id: "recycling", name: "Recycling", icon: MdRecycling, backText: "..." },
-    { id: "garbage", name: "Garbage", icon: BsTrash3, backText: "..." },
-    { id: "compost", name: "Compost", icon: MdCompost, backText: "..." },
+    {
+      id: "biodegradable",
+      name: "Biodegradable",
+      icon: MdOutlineEco,
+      backText:
+        "Food scraps and other biodegradable items should be placed in the organic waste stream.",
+    },
+    {
+      id: "cardboard",
+      name: "Cardboard",
+      icon: FaBoxOpen,
+      backText:
+        "Clean cardboard should be flattened and placed in the recycling stream.",
+    },
+    {
+      id: "glass",
+      name: "Glass",
+      icon: LuGlassWater,
+      backText:
+        "Glass bottles and containers should be disposed of in recycling where accepted.",
+    },
+    {
+      id: "metal",
+      name: "Metal",
+      icon: GiSodaCan,
+      backText:
+        "Metal containers and similar materials should be placed in recycling.",
+    },
+    {
+      id: "paper",
+      name: "Paper",
+      icon: IoDocumentTextOutline,
+      backText:
+        "Clean paper products should be disposed of in the recycling stream.",
+    },
+    {
+      id: "plastic",
+      name: "Plastic",
+      icon: TbCup,
+      backText:
+        "Plastic containers should be sorted according to recycling guidelines.",
+    },
   ];
 
   // this return section below is what gets rendered on the page
   // tailwind classes for layout and style
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      {/* section for intro with slogan and quick tagline*/}
-      <section id="intro" className="text-center py-16">
-        <div className="flex flex-col">
-          {/* Slogan*/}
-          <h1 className="text-8xl font-extrabold tracking-tight text-primary-green pt-24">
-            Smart Sorting for Sustainable Living
-          </h1>
+    <div className="w-full bg-background">
+      <div className="mx-auto flex flex-col items-center max-w-6xl w-full">
+        {/* section for intro with slogan and quick tagline*/}
+        <section id="intro" className="text-center py-16">
+          <div className="flex flex-col">
+            {/* Slogan*/}
+            <h1 className="text-8xl font-extrabold tracking-tight text-primary-green pt-24">
+              Smart Sorting for Sustainable Living
+            </h1>
 
-          {/* Quick Project Description*/}
-          <p className="text-3xl font-bold text-accent-green py-4">
-            Helping communities with AI-driven waste classification for a
-            cleaner, greener future.
-          </p>
-        </div>
-      </section>
-
-      {/*How does it work? */}
-      <section className="text-primary-green mx-auto py-4">
-        <h2 className=" text-4xl text-center font-bold py-5">How It Works</h2>
-
-        <p className="text-xl text-center font-bold">
-          Our Smart Waste Ai project uses a simple pipeline to classify waste in
-          real-time
-        </p>
-
-        {/*React icons for how does it work section */}
-        <section className="mx-auto flex flex-wrap justify-center py-5 gap-12 ">
-          <div
-            className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
-          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
-          >
-            <AiOutlineVideoCamera
-              size={80}
-              className="text-white"
-            ></AiOutlineVideoCamera>
-            <h3 className="font-bold text-white mb-4">Capture Camera Feed</h3>
-          </div>
-
-          <div className="flex justify-center items-center">
-            <TbArrowBigRightLines
-              size={80}
-              className="animate-pulse"
-            ></TbArrowBigRightLines>
-          </div>
-
-          <div
-            className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
-          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
-          >
-            <LuBrainCircuit size={80} className="text-white"></LuBrainCircuit>
-            <h3 className="font-bold text-white mb-4">ML Analyzing Data</h3>
-          </div>
-
-          <div className="flex justify-center items-center">
-            <TbArrowBigRightLines
-              size={80}
-              className="animate-pulse"
-            ></TbArrowBigRightLines>
-          </div>
-          <div
-            className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
-          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
-          >
-            <BiCategoryAlt size={80} className="text-white "></BiCategoryAlt>
-            <h3 className="font-bold text-white mb-4">
-              Classify and Display Results
-            </h3>
+            {/* Quick Project Description*/}
+            <p className="text-3xl font-bold text-accent-green py-4">
+              Helping communities with AI-driven waste classification for a
+              cleaner, greener future.
+            </p>
           </div>
         </section>
-      </section>
 
-      {/*Waste Categories*/}
-      <section className="py-20">
-        <h2 className="text-4xl text-center font-bold text-accent-green mb-10">
-          Our Model Identifies These Waste Categories:
-        </h2>
+        {/*How does it work? */}
+        <section className="text-primary-green mx-auto py-4">
+          <h2 className=" text-4xl text-center font-bold py-5">How It Works</h2>
 
-        {/* Flexbox for all waste category cards */}
-        <div className="flex flex-wrap gap-8 justify-center text-primary-green">
-          {/* container for the recycling tile */}
-          <div className=" perspective-[1000px]">
-            <div
-              className={`relative w-64 h-64 [transform-style:preserve-3d] transition-transform duration-700
-            ${flippedCard == "recycling" ? "[transform:rotateY(180deg)]" : ""}`}
-              // tell React what code to run when tile is clicked
-              onClick={() => handleCardClick("recycling")}
-            >
-              {/* front-facing card for recycling */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center
-              border rounded-2xl p-10 shadow-xl cursor-pointer
-              bg-gradient-to-br from-white to-green-50       
-              transition-all hover:scale-105 ring-1 ring-green-200
-              [backface-visibility:hidden]"
-              >
-                {/* recycling icon */}
-                <MdRecycling size={120}></MdRecycling>
-                <h3 className="text-xl font-bold text-accent-green mt-2 mb-4">
-                  Recycling
-                </h3>
-              </div>
-
-              {/* back facing card for recyling */}
-              <div
-                className={`bg-white absolute inset-0 flex flex-col items-center justify-center
-               rounded-2xl shadow-xl text-primary-green text-lg text-center p-6
-            [backface-visibility:hidden] [transform:rotateY(180deg)] cursor-pointer`}
-              >
-                <p>Bottles and Paper should be Recycled.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="perspective-[1000px]">
-            <div
-              className={`relative w-64 h-64 [transform-style:preserve-3d] transition-transform duration-700
-            ${flippedCard == "garbage" ? "[transform:rotateY(180deg)]" : ""}`}
-              onClick={() => handleCardClick("garbage")}
-            >
-              {/*front facing card for garbage */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center
-              border rounded-2xl p-10 shadow-xl cursor-pointer
-              bg-gradient-to-br from-white to-green-50       
-              transition-all hover:scale-105 ring-1 ring-green-200
-              [backface-visibility:hidden]"
-              >
-                <BsTrash3 size={120}></BsTrash3>
-                <h3 className="text-xl font-bold text-accent-green mt-2 mb-4">
-                  Garbage
-                </h3>
-              </div>
-
-              {/* back facing card for garbage */}
-              <div
-                className="bg-white absolute inset-0 flex flex-col items-center justify-center
-               rounded-2xl shadow-xl text-primary-green text-lg text-center p-6
-            [backface-visibility:hidden] [transform:rotateY(180deg)] cursor-pointer"
-              >
-                <p>Place all items that can't be recycled into the garbage.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="perspective-[1000px]">
-            {/* parent container for compost card */}
-            <div
-              className={`relative w-64 h-64 [transform-style:preserve-3d] transition-transform duration-700
-              ${flippedCard == "compost" ? "[transform:rotateY(180deg)]" : ""}`}
-              onClick={() => handleCardClick("compost")}
-            >
-              {/* front facing card for compost */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center
-              border rounded-2xl p-10 shadow-xl cursor-pointer
-              bg-gradient-to-br from-white to-green-50       
-              transition-all hover:scale-105 ring-1 ring-green-200
-              [backface-visibility:hidden]"
-              >
-                <MdCompost size={120}></MdCompost>
-                <h3 className="text-xl font-bold text-accent-green mt-2 mb-4">
-                  Compost
-                </h3>
-              </div>
-
-              {/* back facing card for compost */}
-              <div
-                className="bg-white absolute inset-0 flex flex-col items-center justify-center
-               rounded-2xl shadow-xl text-primary-green text-lg text-center p-6
-            [backface-visibility:hidden] [transform:rotateY(180deg)] cursor-pointer"
-              >
-                <p>Place all food items in the compost.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/*Video Feed Placeholder*/}
-      <section className="mt-8 text-center flex justify-center py-20">
-        <div className="w-[640px] border rounded shadow-lg px-4 py-12 mb-5">
-          <p className="text-gray-400 text-xl mb-4">
-            Live Video Feed Placeholder
+          <p className="text-xl text-center font-bold">
+            Our Smart Waste AI project uses a simple pipeline to classify waste
+            in real-time
           </p>
-          <video
-            src="/Placeholder_video.mp4"
-            controls
-            muted
-            className="w-full h-auto rounded"
-          ></video>
-        </div>
-      </section>
 
-      {/*Classification Results*/}
-      <section className="text-center mt-6 mb-4">
-        <div className="text-accent-green font-bold border rounded bg-white shadow-md p-12">
-          <h3>Classification Results:</h3>
-          <p>Item: Garbage</p>
-          <p>Confidence: 0.85</p>
-        </div>
-      </section>
+          {/*React icons for how does it work section */}
+          <section className="mx-auto flex flex-wrap justify-center py-5 gap-12 max-w-full overflow-x-hidden">
+            <div
+              className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
+          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
+            >
+              <AiOutlineVideoCamera
+                size={80}
+                className="text-white"
+              ></AiOutlineVideoCamera>
+              <h3 className="font-bold text-white mb-4">Capture Camera Feed</h3>
+            </div>
+
+            <div className="flex justify-center items-center">
+              <TbArrowBigRightLines
+                size={80}
+                className="animate-pulse"
+              ></TbArrowBigRightLines>
+            </div>
+
+            <div
+              className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
+          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
+            >
+              <LuBrainCircuit size={80} className="text-white"></LuBrainCircuit>
+              <h3 className="font-bold text-white mb-4">ML Analyzing Data</h3>
+            </div>
+
+            <div className="flex justify-center items-center">
+              <TbArrowBigRightLines
+                size={80}
+                className="animate-pulse"
+              ></TbArrowBigRightLines>
+            </div>
+            <div
+              className="flex flex-col items-center text-center text-white rounded-xl bg-accent-green
+          shadow-md px-8 py-6 hover:scale-105 transition-transform duration-300"
+            >
+              <BiCategoryAlt size={80} className="text-white "></BiCategoryAlt>
+              <h3 className="font-bold text-white mb-4">
+                Classify and Display Results
+              </h3>
+            </div>
+          </section>
+        </section>
+
+        {/*Waste Categories*/}
+        <section className="py-20">
+          <h2 className="text-4xl text-center font-bold text-accent-green mb-10">
+            Our Model Detects the Following Waste Classes:
+          </h2>
+
+          {/* flex container holding all flip cards */}
+          <div className="flex flex-wrap gap-8 justify-center text-primary-green">
+            {/* iterate through the wasteCategories array to generate a card for each class */}
+            {wasteCategories.map((category) => {
+              // reference to the icon component stored in the data object
+              const IconComponent = category.icon;
+
+              return (
+                <div key={category.id} className="perspective-[1000px]">
+                  {/* container responsible for the 3D flip effect */}
+                  <div
+                    className={`relative w-64 h-64 [transform-style:preserve-3d] transition-transform duration-700
+                    ${flippedCard == category.id ? "[transform:rotateY(180deg)]" : ""}`}
+                    // trigger card flip when clicked
+                    onClick={() => handleCardClick(category.id)}
+                  >
+                    {/* front-facing card showing the waste category */}
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-center
+                      border rounded-2xl p-10 shadow-xl cursor-pointer
+                      bg-gradient-to-br from-white to-green-50
+                      transition-all hover:scale-105 ring-1 ring-green-200
+                      [backface-visibility:hidden]"
+                    >
+                      {/* icon representing the waste class */}
+                      <IconComponent size={110} />
+
+                      {/* waste category label */}
+                      <h3 className="text-xl font-bold text-accent-green mt-4 mb-2 text-center">
+                        {category.name}
+                      </h3>
+                    </div>
+
+                    {/* back-facing card containing disposal information */}
+                    <div
+                      className="bg-surface absolute inset-0 flex flex-col items-center justify-center
+                      rounded-2xl shadow-xl text-primary-green text-lg text-center p-6
+                      [backface-visibility:hidden] [transform:rotateY(180deg)] cursor-pointer"
+                    >
+                      {/* description associated with the waste class */}
+                      <p>{category.backText}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/*Live Video Feed*/}
+        <section className="mt-8 text-center flex justify-center py-20">
+          <div className="w-[640px] border rounded shadow-lg px-4 py-12 mb-5">
+            {/* Title for the finalized live stream mode */}
+            <p className="text-gray-400 text-xl mb-4">
+              Live Python YOLO Stream
+            </p>
+
+            {/* Displays frames directly from Python with detections already drawn */}
+            <PythonStreamView />
+          </div>
+        </section>
+
+        {/*Classification Results*/}
+        <section className="text-center mt-6 mb-4">
+          <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
+            <h3>Classification Results:</h3>
+            <ul>
+              {updates.map((u, i) => (
+                <li key={i}>
+                  {u.timestamp}: {u.waste_type} ({u.confidence})
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

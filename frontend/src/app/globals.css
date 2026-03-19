@@ -11,6 +11,10 @@ each --name creates a reusable variable that can be referenced anywhere as var(-
   --accent-green: #58a32d;
   --light-green: #ccebce;
   --light-blue: #73afeb;
+
+/* for header and footer*/
+--surface: #ffffff;
+--surface-2: #f3f4f6;
 }
 
 /* removes default padding and margins that browsers add to ensure colours remain solid if CSS variables break */
@@ -20,6 +24,9 @@ body {
   padding: 0;
   background: var(--background);
   color: var(--foreground);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* allows Tailwind utilities like bg-background or text-foreground
@@ -31,15 +38,14 @@ to reference the CSS variables we set in :root */
   --color-accent-green: var(--accent-green);
   --color-light-green: var(--light-green);
   --color-light-blue: var(--light-blue);
+
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+
 }
 
-/* this is for dark mode overriding to ensure the website is still viewable */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
+
 
 /* this is how the variables are used in the body
 it sets the global text colour and overflow prevents accidental horizontal scrollbars when layout widths misalign

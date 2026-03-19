@@ -4,10 +4,10 @@ import "./globals.css";
 import { Saira } from "next/font/google";
 
 // setting up function for the imported font
-const saira = Saira ({
-subsets: ['latin'],
-weight: ["400", "600", "700"],
-variable: '--font-saira',
+const saira = Saira({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-saira",
 });
 
 // browser tab and search engine metadata
@@ -16,17 +16,14 @@ export const metadata = {
   description: "AI-powered waste classification system using edge devices",
 };
 
-
-
-
 // RootLayout wraps all webpages
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className = {saira.className}>
+    <html lang="en" suppressHydrationWarning>
       {/* global font and background */}
-      <body className="min-h-screen bg-white text-gray-900 pt-20">
+      <body className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
         {/* header */}
-        <header className=" fixed top-0 left-0 right-0 z-50 bg-white shadow-lg p-4 flex items-center justify-start gap-6">
+        <header className=" fixed top-0 left-0 right-0 z-50 bg-surface shadow-lg p-4 flex items-center justify-start gap-6">
           <img
             src="/project_logo.png"
             alt="Project logo"
@@ -39,10 +36,10 @@ export default function RootLayout({ children }) {
         </header>
 
         {/* main content */}
-        <main className="p-6">{children}</main>
+        <main className="pt-24 p-6">{children}</main>
 
         {/* footer */}
-        <footer className="bg-gray-100 text-center p-4 mt-8 text-sm text-gray-500">
+        <footer className="bg-surface-2 text-center p-4 mt-8 text-sm text-gray-600">
           {/* <a> is a hyperlink tag in HTML
           href is the link to the github repo
           target="_blank" is used to open links in a new tab

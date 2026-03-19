@@ -2,7 +2,30 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, start the WebSocket server:
+- cd into the frontend/src/app folder
+
+```bash
+node socket-server
+```
+
+You should see "Socket.IO server running on port 4000" on the terminal.
+
+Second, start real-time detection: 
+- NOTE: run this file on a separate terminal.
+- cd into the backend folder
+  
+```bash
+python realtime_detect.py
+# or
+python3 realtime_detect.py
+```
+
+If done correctly, this should open the webcam and allow you to run YOLO inferences in real time.
+
+Finally, run the development server:
+- NOTE: run this file on a separate terminal.
+- cd into the frontend/src/app folder
 
 ```bash
 npm run dev
@@ -14,7 +37,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The 'Classification Results' section should update each time an object is detected which shows that inference data is being passed from the backend to frontend correctly.  
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
