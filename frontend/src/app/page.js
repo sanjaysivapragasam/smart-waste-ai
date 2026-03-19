@@ -137,7 +137,7 @@ export default function Home() {
           <h2 className=" text-4xl text-center font-bold py-5">How It Works</h2>
 
           <p className="text-xl text-center font-bold">
-            Our Smart Waste Ai project uses a simple pipeline to classify waste
+            Our Smart Waste AI project uses a simple pipeline to classify waste
             in real-time
           </p>
 
