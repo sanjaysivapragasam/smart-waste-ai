@@ -1,4 +1,15 @@
+// importing the global css code
 import "./globals.css";
+// importing the dashboard front from Google Fonts
+import { Saira } from "next/font/google";
+
+// setting up function for the imported font
+const saira = Saira({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-saira",
+});
+
 // browser tab and search engine metadata
 export const metadata = {
   title: "Smart Waste AI",
