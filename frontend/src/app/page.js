@@ -3,8 +3,7 @@
 "use client";
 
 // Import React to access to React's hooks (useState, useEffect)
-import React, { useState, useEffect } from "react";
-// import {useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Import socket.io client library
 import { io } from "socket.io-client";
@@ -31,21 +30,46 @@ import PythonStreamView from "./components/PythonStreamView";
 // main React component for the homepage
 // every Next.js route is a React component
 export default function Home() {
-  // state to hold real-time updates from ML model
-  const [updates, setUpdates] = useState([]);
+  // state to hold current detections keyed by waste_type (not a history log)
+  const [updates, setUpdates] = useState({});
+
+  // Timer ref used to clear detections when nothing is being detected
+  const clearTimer = useRef(null);
+
+  // State to control which visualization mode we're using
+  // "browser-camera" = CameraPreview with overlay
+  // "python-stream" = PythonStreamView with frames sent over network
+  const [displayMode, setDisplayMode] = useState("browser-camera");
+
+  // reference to the video element for drawing boxes on top
+  const videoRef = useRef(null);
 
   // useEffect to set up WebSocket connection on component mount
   useEffect(() => {
     // connects to WebSocket server
     const socket = io("http://localhost:4000");
 
-    // listens for "update" events from server (socket-server.js)
+    // listens for "update" events from server (socket-server.mjs)
+    // keys by waste_type so each category shows only once (current state)
     socket.on("update", (data) => {
-      setUpdates((prev) => [data, ...prev].slice(0, 10)); // keep last 10 updates
+      setUpdates((prev) => ({
+        ...prev,
+        [data.waste_type]: data,
+      }));
       console.log("Real-time update:", data);
+
+      // Reset the clear timer on every new detection
+      // Clears display ~1 second after detections stop arriving
+      clearTimeout(clearTimer.current);
+      clearTimer.current = setTimeout(() => {
+        setUpdates({});
+      }, 1000);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.disconnect();
+      clearTimeout(clearTimer.current);
+    };
   }, []);
 
   // creating a state for the card flip
@@ -255,16 +279,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/*Classification Results*/}
+        {/*Classification Results — shows only what's currently on screen */}
         <section className="text-center mt-6 mb-4">
           <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
-            <h3>Classification Results:</h3>
+            <h3 className="mb-4">Classification Results:</h3>
             <ul>
-              {updates.map((u, i) => (
-                <li key={i}>
-                  {u.timestamp}: {u.waste_type} ({u.confidence})
-                </li>
-              ))}
+              {Object.values(updates).length === 0 ? (
+                <li className="text-gray-400 font-normal">No items currently detected</li>
+              ) : (
+                Object.values(updates).map((u) => (
+                  <li key={u.waste_type}>
+                    {u.waste_type} — {Math.round(u.confidence * 100)}% confidence
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </section>
