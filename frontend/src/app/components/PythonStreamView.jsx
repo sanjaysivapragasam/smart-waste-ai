@@ -18,7 +18,17 @@ export default function PythonStreamView() {
   useEffect(() => {
     // Connect to Socket.IO server
     console.log("PythonStreamView: Connecting to Socket.IO server...");
-    socketRef.current = io("http://localhost:4000");
+    socketRef.current = io(
+      // add environment variable of the ngrok URL
+      // if its not available, it uses local host
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+      {
+        // transport defines how client communicates with server
+        // websocket is preferred and is used for fast real-time comms
+        // polling is a fallback incase websocket is blocked
+        transports: ["websocket", "polling"],
+      },
+    );
 
     // Listen for connection events
     socketRef.current.on("connect", () => {
