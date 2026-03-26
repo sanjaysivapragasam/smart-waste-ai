@@ -47,7 +47,11 @@ export default function Home() {
   // useEffect to set up WebSocket connection on component mount
   useEffect(() => {
     // connects to WebSocket server
-    const socket = io("http://localhost:4000");
+    // uses ngrok public URL in production
+    // falls back to localhost for local dev
+    const socket = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+    );
 
     // listens for "update" events from server (socket-server.mjs)
     // keys by waste_type so each category shows only once (current state)
@@ -285,11 +289,14 @@ export default function Home() {
             <h3 className="mb-4">Classification Results:</h3>
             <ul>
               {Object.values(updates).length === 0 ? (
-                <li className="text-gray-400 font-normal">No items currently detected</li>
+                <li className="text-gray-400 font-normal">
+                  No items currently detected
+                </li>
               ) : (
                 Object.values(updates).map((u) => (
                   <li key={u.waste_type}>
-                    {u.waste_type} — {Math.round(u.confidence * 100)}% confidence
+                    {u.waste_type} — {Math.round(u.confidence * 100)}%
+                    confidence
                   </li>
                 ))
               )}

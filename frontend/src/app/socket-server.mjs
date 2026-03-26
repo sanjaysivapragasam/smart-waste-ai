@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 4000;
 //creates a base http server (required by socket.io)
 const httpServer = createServer();
 
-//wrap the http server with socket.io (web socket server)
+// wrap the http server with socket.io (web socket server)
 const io = new Server(httpServer, {
   // configure CORS (Cross-Origin Resource Sharing) for Next.js frontend (only accepts requests from there)
   cors: {
