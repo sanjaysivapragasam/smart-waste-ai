@@ -21,6 +21,11 @@ import { GiSodaCan } from "react-icons/gi";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { TbCup } from "react-icons/tb";
 
+// importing icons for classification results 
+import { FaRecycle } from "react-icons/fa";
+import { FaLeaf } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
+
 // importing the camera component created for the computer vison
 import PythonStreamView from "./components/PythonStreamView";
 // commented out the below because its no longer needed
@@ -46,20 +51,41 @@ export default function Home() {
 
   // useEffect to set up WebSocket connection on component mount
   useEffect(() => {
-    // connects to WebSocket server
-    const socket = io("http://localhost:4000");
+    // connects to socket server
+    // uses ngrok public URL in production
+    // falls back to localhost for local dev
+    const socket = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+      {
+        // transport defines how client communicates with server
+        // websocket is preferred and is used for fast real-time comms
+        // polling is a fallback in case websocket fails
+        transports: ["websocket", "polling"],
+      },
+    );
+
+    // log when the classification-results socket connects
+    socket.on("connect", () => {
+      console.log("page.js: Connected to Socket.IO server");
+    });
+
+    // log when the classification-results socket disconnects
+    socket.on("disconnect", () => {
+      console.log("page.js: Disconnected from Socket.IO server");
+    });
 
     // listens for "update" events from server (socket-server.mjs)
     // keys by waste_type so each category shows only once (current state)
     socket.on("update", (data) => {
+      console.log("Real-time update:", data);
+
       setUpdates((prev) => ({
         ...prev,
         [data.waste_type]: data,
       }));
-      console.log("Real-time update:", data);
 
-      // Reset the clear timer on every new detection
-      // Clears display ~1 second after detections stop arriving
+      // reset the clear timer on every new detection
+      // clears display about 1 second after detections stop arriving
       clearTimeout(clearTimer.current);
       clearTimer.current = setTimeout(() => {
         setUpdates({});
@@ -134,6 +160,29 @@ export default function Home() {
         "Plastic containers should be sorted according to recycling guidelines.",
     },
   ];
+
+  // Map specific waste classes → high-level category
+  const wasteToCategory = {
+    paper: "recyclable",
+    plastic: "recyclable",
+    cardboard: "recyclable",
+    glass: "recyclable",
+    metal: "recyclable",
+    biodegradable: "compostable",
+  };
+
+  // Icons for each category 
+  const categoryIcons = {
+    recyclable: <FaRecycle size={24} className="inline-block ml-2" />,
+    compostable: <FaLeaf size={24} className="inline-block ml-2" />,
+    waste: <FaTrash size={24} className="inline-block ml-2" />,
+  };
+
+  const categoryColors = {
+    recyclable: "text-blue-500",
+    compostable: "text-green-500",
+    waste: "text-black",
+  };
 
   // this return section below is what gets rendered on the page
   // tailwind classes for layout and style
@@ -279,19 +328,50 @@ export default function Home() {
           </div>
         </section>
 
-        {/*Classification Results — shows only what's currently on screen */}
+        {/*Classification Results — shows both raw + mapped category */}
         <section className="text-center mt-6 mb-4">
           <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
             <h3 className="mb-4">Classification Results:</h3>
+
             <ul>
               {Object.values(updates).length === 0 ? (
-                <li className="text-gray-400 font-normal">No items currently detected</li>
+                <li className="text-gray-400 font-normal">
+                  No items currently detected
+                </li>
               ) : (
-                Object.values(updates).map((u) => (
-                  <li key={u.waste_type}>
-                    {u.waste_type} — {Math.round(u.confidence * 100)}% confidence
-                  </li>
-                ))
+                Object.values(updates).map((u) => {
+                  const category =
+                    wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
+
+                  return (
+                    <li
+                      key={u.waste_type}
+                      className="flex items-center justify-center gap-2 mb-2"
+                    >
+                      {/* Original model prediction */}
+                      <span className="font-semibold">
+                        {u.waste_type}
+                      </span>
+
+                      <span className="text-gray-500">→</span>
+
+                      {/* Converted category */}
+                      <span className={`${categoryColors[category]}`}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </span>
+
+                      {/* Icon */}
+                      <span className="animate-bounce">
+                        {categoryIcons[category]}
+                      </span>
+
+                      {/* Confidence */}
+                      <span className="text-sm text-gray-400 ml-2">
+                        ({Math.round(u.confidence * 100)}%)
+                      </span>
+                    </li>
+                  );
+                })
               )}
             </ul>
           </div>
