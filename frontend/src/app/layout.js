@@ -21,7 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       {/* global font and background */}
-      <body className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
+      <body
+        suppressHydrationWarning={true}
+        className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden"
+      >
         {/* header */}
         <header className=" fixed top-0 left-0 right-0 z-50 bg-surface shadow-lg p-4 flex items-center justify-start gap-6">
           <img
