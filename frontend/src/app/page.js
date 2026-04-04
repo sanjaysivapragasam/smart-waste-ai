@@ -21,7 +21,7 @@ import { GiSodaCan } from "react-icons/gi";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { TbCup } from "react-icons/tb";
 
-// importing icons for classification results 
+// importing icons for classification results
 import { FaRecycle } from "react-icons/fa";
 import { FaLeaf } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa";
@@ -171,7 +171,7 @@ export default function Home() {
     biodegradable: "compostable",
   };
 
-  // Icons for each category 
+  // Icons for each category
   const categoryIcons = {
     recyclable: <FaRecycle size={24} className="inline-block ml-2" />,
     compostable: <FaLeaf size={24} className="inline-block ml-2" />,
@@ -325,55 +325,54 @@ export default function Home() {
 
             {/* Displays frames directly from Python with detections already drawn */}
             <PythonStreamView />
-          </div>
-        </section>
 
-        {/*Classification Results — shows both raw + mapped category */}
-        <section className="text-center mt-6 mb-4">
-          <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
-            <h3 className="mb-4">Classification Results:</h3>
+            {/*Classification Results — shows both raw + mapped category */}
+            <section className="text-center mt-6 mb-4">
+              <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
+                <h3 className="mb-4">Classification Results:</h3>
 
-            <ul>
-              {Object.values(updates).length === 0 ? (
-                <li className="text-gray-400 font-normal">
-                  No items currently detected
-                </li>
-              ) : (
-                Object.values(updates).map((u) => {
-                  const category =
-                    wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
-
-                  return (
-                    <li
-                      key={u.waste_type}
-                      className="flex items-center justify-center gap-2 mb-2"
-                    >
-                      {/* Original model prediction */}
-                      <span className="font-semibold">
-                        {u.waste_type}
-                      </span>
-
-                      <span className="text-gray-500">→</span>
-
-                      {/* Converted category */}
-                      <span className={`${categoryColors[category]}`}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </span>
-
-                      {/* Icon */}
-                      <span className="animate-bounce">
-                        {categoryIcons[category]}
-                      </span>
-
-                      {/* Confidence */}
-                      <span className="text-sm text-gray-400 ml-2">
-                        ({Math.round(u.confidence * 100)}%)
-                      </span>
+                <ul>
+                  {Object.values(updates).length === 0 ? (
+                    <li className="text-gray-400 font-normal">
+                      No items currently detected
                     </li>
-                  );
-                })
-              )}
-            </ul>
+                  ) : (
+                    Object.values(updates).map((u) => {
+                      const category =
+                        wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
+
+                      return (
+                        <li
+                          key={u.waste_type}
+                          className="flex items-center justify-center gap-2 mb-2"
+                        >
+                          {/* Original model prediction */}
+                          <span className="font-semibold">{u.waste_type}</span>
+
+                          <span className="text-gray-500">→</span>
+
+                          {/* Converted category */}
+                          <span className={`${categoryColors[category]}`}>
+                            {category.charAt(0).toUpperCase() +
+                              category.slice(1)}
+                          </span>
+
+                          {/* Icon */}
+                          <span className="animate-bounce">
+                            {categoryIcons[category]}
+                          </span>
+
+                          {/* Confidence */}
+                          <span className="text-sm text-gray-400 ml-2">
+                            ({Math.round(u.confidence * 100)}%)
+                          </span>
+                        </li>
+                      );
+                    })
+                  )}
+                </ul>
+              </div>
+            </section>
           </div>
         </section>
       </div>
