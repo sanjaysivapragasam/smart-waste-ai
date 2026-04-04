@@ -47,6 +47,18 @@ ITEM_TO_BIN = {
     "METAL":            "METAL",
     "BIODEGRADABLE":    "BIODEGRADABLE",
 }
+
+# Better colour scheme for bounding boxes / labels
+BIN_COLORS = {
+    "PAPER":         (255, 200, 0),    # cyan-ish
+    "PLASTIC":       (0, 255, 255),    # yellow
+    "CARDBOARD":     (42, 42, 165),    # brown-ish
+    "GLASS":         (255, 0, 255),    # magenta
+    "METAL":         (192, 192, 192),  # silver-ish
+    "BIODEGRADABLE": (0, 200, 0),      # green
+    "UNKNOWN":       (0, 255, 0),      # fallback green
+}
+
 # -------------------------------
 # SOCKET.IO SETUP
 # -------------------------------
@@ -87,6 +99,54 @@ def send_inference_result(waste_type, confidence):
         sio.emit("update", data)
     except Exception as e:
         print(f"⚠ Failed to send inference result: {e}")
+
+def draw_outlined_text(img, text, org, font, scale, color, thickness=2):
+    # black outline behind coloured/white text for better readability
+    cv2.putText(img, text, org, font, scale, (0, 0, 0), thickness + 2, cv2.LINE_AA)
+    cv2.putText(img, text, org, font, scale, color, thickness, cv2.LINE_AA)
+
+def draw_hud(img, fps: float, det_count: int, summary: str) -> None:
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    draw_outlined_text(img, f"FPS: {fps:5.1f}", (10, 30), font, 0.8, (255, 255, 255), 2)
+    draw_outlined_text(img, f"Detections: {det_count}", (10, 60), font, 0.8, (255, 255, 255), 2)
+    draw_outlined_text(img, summary, (10, 90), font, 0.7, (255, 255, 255), 2)
+
+def draw_detection_box(img, x1, y1, x2, y2, item, bin_name, conf):
+    color = BIN_COLORS.get(bin_name, BIN_COLORS["UNKNOWN"])
+
+    # bounding box
+    cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+    # label text
+    label = f"{item} {conf:.2f} -> {bin_name}"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    scale = 0.55
+    thickness = 2
+
+    (text_w, text_h), baseline = cv2.getTextSize(label, font, scale, thickness)
+    text_x = x1
+    text_y = max(25, y1 - 10)
+
+    # filled label background
+    cv2.rectangle(
+        img,
+        (text_x, text_y - text_h - 8),
+        (text_x + text_w + 8, text_y + baseline - 2),
+        color,
+        -1
+    )
+
+    # text on label background
+    cv2.putText(
+        img,
+        label,
+        (text_x + 4, text_y - 4),
+        font,
+        scale,
+        (255, 255, 255),
+        thickness,
+        cv2.LINE_AA
+    )
 
 # -------------------------------
 # MAIN
@@ -141,7 +201,7 @@ def main():
                 for b in results.boxes:
                     cls_id          = int(b.cls.item())
                     conf            = float(b.conf.item())
-                    x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
+                    x1, y1, x2, y2  = map(int, b.xyxy[0].tolist())
                     item            = names[cls_id]
                     bin_name        = ITEM_TO_BIN.get(item, "UNKNOWN")
                     last_boxes.append((x1, y1, x2, y2, item, bin_name, conf))
@@ -159,24 +219,24 @@ def main():
 
         for (x1, y1, x2, y2, item, bin_name, conf) in last_boxes:
             bin_counts[bin_name] += 1
-            cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            label  = f"{item} {conf:.2f} -> {bin_name}"
-            y_text = max(20, y1 - 8)
-            cv2.putText(annotated, label, (x1, y_text),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0), 2)
+            draw_detection_box(annotated, x1, y1, x2, y2, item, bin_name, conf)
 
         # Bin summary
         summary = " | ".join([f"{k}:{v}" for k, v in bin_counts.items()]) if bin_counts else "No detections"
-        cv2.putText(annotated, summary, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
 
         # FPS counter
+        now       = time.time()
+        dt        = now - prev_time
+        prev_time = now
+        fps       = 0.9 * fps + 0.1 * (1.0 / max(dt, 1e-6))
+
+        det_count = len(last_boxes)
+
         if SHOW_FPS:
-            now      = time.time()
-            dt       = now - prev_time
-            prev_time = now
-            fps      = 0.9 * fps + 0.1 * (1.0 / max(dt, 1e-6))
-            cv2.putText(annotated, f"FPS: {fps:.1f}", (10, 60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+            draw_hud(annotated, fps, det_count, summary)
+        else:
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            draw_outlined_text(annotated, summary, (10, 30), font, 0.7, (255, 255, 255), 2)
 
         # Send annotated frame to browser
         send_frame(annotated)
