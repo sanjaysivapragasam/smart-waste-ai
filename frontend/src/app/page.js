@@ -316,54 +316,58 @@ export default function Home() {
         </section>
 
         {/*Live Video Feed*/}
-        <section className="mt-8 text-center flex justify-center py-20">
-          <div className="flex flex-row gap-6 items-center border rounded shadow-lg px-4 py-12 mb-5">
+        <section className="mt-8 flex justify-center py-20 w-full px-4">
+          <div className="flex flex-col lg:flex-row gap-8 items-center border border-gray-200 rounded-2xl px-8 py-10 mb-5 w-full max-w-5xl shadow-sm">
             {/* Left: Video Stream */}
-            <div className="flex flex-col items-center">
-              <p className="text-gray-400 text-xl mb-4">
+            <div className="flex flex-col w-full">
+              <p className="text-gray-400 text-lg font-medium mb-4 text-center">
                 Live Python YOLO Stream
               </p>
               <PythonStreamView />
             </div>
 
+            {/* Divider — horizontal on mobile, vertical on desktop */}
+            <div className="w-full h-px lg:w-px lg:h-48 bg-gray-200 shrink-0" />
+
             {/* Right: Classification Results */}
-            <div className="flex flex-col justify-center self-center min-w-[220px] max-w-[260px]">
-              <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-6">
-                <h3 className="mb-4">Classification Results:</h3>
-                <ul>
-                  {Object.values(updates).length === 0 ? (
-                    <li className="text-gray-400 font-normal">
-                      No items currently detected
-                    </li>
-                  ) : (
-                    Object.values(updates).map((u) => {
-                      const category =
-                        wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
-                      return (
-                        <li
-                          key={u.waste_type}
-                          className="flex flex-col items-start gap-1 mb-4"
-                        >
-                          <span className="font-semibold">{u.waste_type}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-500">→</span>
-                            <span className={`${categoryColors[category]}`}>
-                              {category.charAt(0).toUpperCase() +
-                                category.slice(1)}
-                            </span>
-                            <span className="animate-bounce">
-                              {categoryIcons[category]}
-                            </span>
-                          </div>
-                          <span className="text-sm text-gray-400">
-                            ({Math.round(u.confidence * 100)}%)
+            <div className="shrink-0 w-full lg:w-[220px]">
+              <p className="text-accent-green font-bold text-base mb-4 text-center lg:text-left">
+                Classification Results
+              </p>
+              <ul className="space-y-4">
+                {Object.values(updates).length === 0 ? (
+                  <li className="text-gray-400 text-sm text-center lg:text-left">
+                    No items currently detected
+                  </li>
+                ) : (
+                  Object.values(updates).map((u) => {
+                    const category =
+                      wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
+                    return (
+                      <li key={u.waste_type} className="flex flex-col gap-1">
+                        <span className="font-semibold text-primary-green text-sm">
+                          {u.waste_type}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-xs">→</span>
+                          <span
+                            className={`text-sm font-medium ${categoryColors[category]}`}
+                          >
+                            {category.charAt(0).toUpperCase() +
+                              category.slice(1)}
                           </span>
-                        </li>
-                      );
-                    })
-                  )}
-                </ul>
-              </div>
+                          <span className="animate-bounce">
+                            {categoryIcons[category]}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          {Math.round(u.confidence * 100)}% confidence
+                        </span>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
             </div>
           </div>
         </section>

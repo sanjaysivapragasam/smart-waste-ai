@@ -48,49 +48,49 @@ export default function PythonStreamView() {
   }, []); // Empty dependency array = run once on mount
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-3">
-      {/* Connection status indicator */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Python Stream:{" "}
-          <span className="font-semibold">
-            {isConnected ? "Connected ✓" : "Waiting for connection..."}
-          </span>
+    <div className="w-full mx-auto space-y-3">
+      {/* Connection badge */}
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-block w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-gray-400"}`}
+        />
+        <p className="text-sm text-gray-500">
+          {isConnected ? "Connected" : "Waiting for connection..."}
         </p>
       </div>
 
-      {/* Display area for the video stream */}
-      <div className="w-full rounded-lg border shadow bg-black overflow-hidden">
+      {/* Stream area */}
+      <div className="w-full rounded-xl border border-gray-200 bg-black overflow-hidden">
         {currentFrame ? (
-          // Show the frame from Python if available
           <img
             src={currentFrame}
             alt="Python YOLO Stream"
-            className="w-full h-auto"
+            className="w-full h-auto block"
           />
         ) : (
-          // Placeholder while waiting for frames
           <div className="w-full aspect-video flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-gray-400 text-lg mb-2">
+            <div className="text-center space-y-1">
+              <p className="text-gray-400 text-base">
                 {isConnected
-                  ? "Waiting for video stream from Python..."
+                  ? "Waiting for video stream..."
                   : "Not connected to server"}
-              </div>
-              <div className="text-gray-500 text-sm">
+              </p>
+              <p className="text-gray-600 text-sm">
                 Make sure realtime_detect_stream.py is running
-              </div>
+              </p>
             </div>
           </div>
         )}
       </div>
-
-      {/* Info box explaining what this view shows */}
-      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-        <strong>Python Stream Mode:</strong> Displays frames directly from
-        Python's camera with YOLO detections already drawn. This shows exactly
-        what the Python script sees.
-      </div>
     </div>
   );
+
+  //     {/* Info box explaining what this view shows
+  //     <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+  //       <strong>Python Stream Mode:</strong> Displays frames directly from
+  //       Python's camera with YOLO detections already drawn. This shows exactly
+  //       what the Python script sees.
+  //     </div> */}
+  //   </div>
+  // );
 }
