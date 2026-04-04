@@ -317,20 +317,19 @@ export default function Home() {
 
         {/*Live Video Feed*/}
         <section className="mt-8 text-center flex justify-center py-20">
-          <div className="w-[640px] border rounded shadow-lg px-4 py-12 mb-5">
-            {/* Title for the finalized live stream mode */}
-            <p className="text-gray-400 text-xl mb-4">
-              Live Python YOLO Stream
-            </p>
+          <div className="flex flex-row gap-6 items-center border rounded shadow-lg px-4 py-12 mb-5">
+            {/* Left: Video Stream */}
+            <div className="flex flex-col items-center">
+              <p className="text-gray-400 text-xl mb-4">
+                Live Python YOLO Stream
+              </p>
+              <PythonStreamView />
+            </div>
 
-            {/* Displays frames directly from Python with detections already drawn */}
-            <PythonStreamView />
-
-            {/*Classification Results — shows both raw + mapped category */}
-            <section className="text-center mt-6 mb-4">
-              <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-12">
+            {/* Right: Classification Results */}
+            <div className="flex flex-col justify-center self-center min-w-[220px] max-w-[260px]">
+              <div className="text-accent-green font-bold border rounded bg-surface shadow-md p-6">
                 <h3 className="mb-4">Classification Results:</h3>
-
                 <ul>
                   {Object.values(updates).length === 0 ? (
                     <li className="text-gray-400 font-normal">
@@ -340,30 +339,23 @@ export default function Home() {
                     Object.values(updates).map((u) => {
                       const category =
                         wasteToCategory[u.waste_type?.toLowerCase()] || "waste";
-
                       return (
                         <li
                           key={u.waste_type}
-                          className="flex items-center justify-center gap-2 mb-2"
+                          className="flex flex-col items-start gap-1 mb-4"
                         >
-                          {/* Original model prediction */}
                           <span className="font-semibold">{u.waste_type}</span>
-
-                          <span className="text-gray-500">→</span>
-
-                          {/* Converted category */}
-                          <span className={`${categoryColors[category]}`}>
-                            {category.charAt(0).toUpperCase() +
-                              category.slice(1)}
-                          </span>
-
-                          {/* Icon */}
-                          <span className="animate-bounce">
-                            {categoryIcons[category]}
-                          </span>
-
-                          {/* Confidence */}
-                          <span className="text-sm text-gray-400 ml-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">→</span>
+                            <span className={`${categoryColors[category]}`}>
+                              {category.charAt(0).toUpperCase() +
+                                category.slice(1)}
+                            </span>
+                            <span className="animate-bounce">
+                              {categoryIcons[category]}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-400">
                             ({Math.round(u.confidence * 100)}%)
                           </span>
                         </li>
@@ -372,7 +364,7 @@ export default function Home() {
                   )}
                 </ul>
               </div>
-            </section>
+            </div>
           </div>
         </section>
       </div>
