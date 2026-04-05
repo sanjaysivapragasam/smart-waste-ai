@@ -12,7 +12,7 @@ const saira = Saira({
 
 // browser tab and search engine metadata
 export const metadata = {
-  title: "Smart Waste AI",
+  title: "SmartBin Assist",
   description: "AI-powered waste classification system using edge devices",
 };
 
@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
           ></img>
 
           <h1 className="text-3xl font-semibold text-[var(--accent-green)]">
-            Smart Waste AI
+            SmartBin Assist
           </h1>
         </header>
 
@@ -49,9 +49,9 @@ export default function RootLayout({ children }) {
           rel="noopener noreferrer" is a security measure when opening new tabs
           
           */}
-          © {new Date().getFullYear()} Smart Waste AI Project
+          © {new Date().getFullYear()} SmartBin Assist
           <a
-            href="https://github.com/sanjaysivapragasam/smart-waste-ai"
+            href="https://github.com/sanjaysivapragasam/SmartBin-Assist"
             target="_blank"
             rel="noopener noreferrer"
           >
