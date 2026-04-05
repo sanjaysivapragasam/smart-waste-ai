@@ -14,12 +14,14 @@ Performance optimizations applied:
 import cv2
 import time
 import threading
+import csv
 from datetime import datetime
 from pathlib import Path
 from ultralytics import YOLO
-from collections import Counter
+from collections import Counter, deque
 import socketio
 import base64
+import pandas as pd
 
 # -------------------------------
 # CONFIG
@@ -35,6 +37,11 @@ INFER_EVERY_N   = 3     # Only run YOLO every Nth frame; reuse last results in b
 JPEG_QUALITY    = 50    # Lower = smaller payload = faster transfer
 
 SOCKET_SERVER_URL = "http://localhost:4000"
+
+# Simple performance logging settings
+PRINT_METRICS_EVERY = 30
+SAVE_METRICS_CSV    = True
+METRICS_CSV_PATH    = "realtime_metrics.csv"
 
 # Class to bin mapping
 ITEM_TO_BIN = {
@@ -81,13 +88,116 @@ except Exception as e:
 # -------------------------------
 # HELPERS
 # -------------------------------
+class MetricsTracker:
+    def __init__(self, csv_path=None):
+        self.csv_path = csv_path
+
+        self.capture_ms_hist  = deque(maxlen=100)
+        self.infer_ms_hist    = deque(maxlen=100)
+        self.draw_ms_hist     = deque(maxlen=100)
+        self.encode_ms_hist   = deque(maxlen=100)
+        self.emit_ms_hist     = deque(maxlen=100)
+        self.loop_ms_hist     = deque(maxlen=100)
+        self.display_fps_hist = deque(maxlen=100)
+
+        if self.csv_path:
+            with open(self.csv_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "timestamp",
+                    "frame_idx",
+                    "did_infer",
+                    "detections",
+                    "capture_ms",
+                    "infer_ms",
+                    "draw_ms",
+                    "encode_ms",
+                    "emit_ms",
+                    "loop_ms",
+                    "display_fps"
+                ])
+
+    @staticmethod
+    def avg(values):
+        return sum(values) / len(values) if values else 0.0
+
+    def record(
+        self,
+        frame_idx,
+        did_infer,
+        detections,
+        capture_ms,
+        infer_ms,
+        draw_ms,
+        encode_ms,
+        emit_ms,
+        loop_ms,
+        display_fps,
+    ):
+        self.capture_ms_hist.append(capture_ms)
+        self.infer_ms_hist.append(infer_ms)
+        self.draw_ms_hist.append(draw_ms)
+        self.encode_ms_hist.append(encode_ms)
+        self.emit_ms_hist.append(emit_ms)
+        self.loop_ms_hist.append(loop_ms)
+        self.display_fps_hist.append(display_fps)
+
+        if self.csv_path:
+            with open(self.csv_path, "a", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    frame_idx,
+                    int(did_infer),
+                    detections,
+                    round(capture_ms, 3),
+                    round(infer_ms, 3),
+                    round(draw_ms, 3),
+                    round(encode_ms, 3),
+                    round(emit_ms, 3),
+                    round(loop_ms, 3),
+                    round(display_fps, 3),
+                ])
+
+    def print_summary(self, frame_idx):
+        print(
+            f"[METRICS] frame={frame_idx} | "
+            f"capture={self.avg(self.capture_ms_hist):6.1f} ms | "
+            f"infer={self.avg(self.infer_ms_hist):6.1f} ms | "
+            f"draw={self.avg(self.draw_ms_hist):6.1f} ms | "
+            f"encode={self.avg(self.encode_ms_hist):6.1f} ms | "
+            f"emit={self.avg(self.emit_ms_hist):6.1f} ms | "
+            f"loop={self.avg(self.loop_ms_hist):6.1f} ms | "
+            f"fps={self.avg(self.display_fps_hist):5.1f}"
+        )
+
 def send_frame(annotated_frame):
+    encode_ms = 0.0
+    emit_ms = 0.0
+
     try:
-        _, buffer = cv2.imencode('.jpg', annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
+        t0 = time.perf_counter()
+
+        _, buffer = cv2.imencode(
+            '.jpg',
+            annotated_frame,
+            [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY]
+        )
+
+        t1 = time.perf_counter()
+
         frame_base64 = base64.b64encode(buffer).decode('utf-8')
         sio.emit("frame", {"image": frame_base64})
+
+        t2 = time.perf_counter()
+
+        encode_ms = (t1 - t0) * 1000.0
+        emit_ms   = (t2 - t1) * 1000.0
+
     except Exception as e:
         print(f"⚠ Failed to send frame: {e}")
+
+    return encode_ms, emit_ms
 
 def send_inference_result(waste_type, confidence):
     data = {
@@ -171,6 +281,7 @@ def main():
     fps         = 0.0
     frame_count = 0
     last_boxes  = []   # cache of (x1, y1, x2, y2, item, bin_name, conf)
+    metrics     = MetricsTracker(METRICS_CSV_PATH if SAVE_METRICS_CSV else None)
 
     print("✓ System ready (STREAM MODE)!")
     print("  - OpenCV window shows detections")
@@ -178,14 +289,30 @@ def main():
     print("  - Press 'q' to quit\n")
 
     while True:
+        loop_t0 = time.perf_counter()
+
+        # Read next frame from webcam
+        cap_t0 = time.perf_counter()
         ok, frame = cap.read()
+        cap_t1 = time.perf_counter()
+
         if not ok:
             break
+
+        capture_ms = (cap_t1 - cap_t0) * 1000.0
+        infer_ms   = 0.0
+        draw_ms    = 0.0
+        encode_ms  = 0.0
+        emit_ms    = 0.0
+        did_infer  = False
 
         frame_count += 1
 
         # Run YOLO only every INFER_EVERY_N frames
         if frame_count % INFER_EVERY_N == 0:
+            did_infer = True
+            infer_t0 = time.perf_counter()
+
             results = model.predict(
                 source=frame,
                 imgsz=IMG_SIZE,
@@ -193,6 +320,9 @@ def main():
                 iou=IOU_THRES,
                 verbose=False,
             )[0]
+
+            infer_t1 = time.perf_counter()
+            infer_ms = (infer_t1 - infer_t0) * 1000.0
 
             names      = results.names
             last_boxes = []
@@ -214,6 +344,8 @@ def main():
         # ------------------------------------------------------------------
         # Draw last known boxes onto every frame (inference or not)
         # ------------------------------------------------------------------
+        draw_t0 = time.perf_counter()
+
         annotated  = frame.copy()
         bin_counts = Counter()
 
@@ -238,10 +370,32 @@ def main():
             font = cv2.FONT_HERSHEY_SIMPLEX
             draw_outlined_text(annotated, summary, (10, 30), font, 0.7, (255, 255, 255), 2)
 
+        draw_t1 = time.perf_counter()
+        draw_ms = (draw_t1 - draw_t0) * 1000.0
+
         # Send annotated frame to browser
-        send_frame(annotated)
+        encode_ms, emit_ms = send_frame(annotated)
 
         cv2.imshow("Garbage Detection (STREAM MODE)", annotated)
+
+        loop_t1 = time.perf_counter()
+        loop_ms = (loop_t1 - loop_t0) * 1000.0
+
+        metrics.record(
+            frame_idx=frame_count,
+            did_infer=did_infer,
+            detections=det_count,
+            capture_ms=capture_ms,
+            infer_ms=infer_ms,
+            draw_ms=draw_ms,
+            encode_ms=encode_ms,
+            emit_ms=emit_ms,
+            loop_ms=loop_ms,
+            display_fps=fps,
+        )
+
+        if frame_count % PRINT_METRICS_EVERY == 0:
+            metrics.print_summary(frame_count)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
