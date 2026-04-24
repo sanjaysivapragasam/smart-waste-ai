@@ -18,7 +18,16 @@ export default function PythonStreamView() {
   useEffect(() => {
     // Connect to Socket.IO server
     console.log("PythonStreamView: Connecting to Socket.IO server...");
-    socketRef.current = io("http://localhost:4000");
+    //socketRef.current = io("http://localhost:4000");
+    socketRef.current = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+      {
+        transports: ["websocket", "polling"],
+        extraHeaders: {
+          "ngrok-skip-browser-warning": "1",
+        },
+      },
+    );
 
     // Listen for connection events
     socketRef.current.on("connect", () => {
