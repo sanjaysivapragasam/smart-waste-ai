@@ -28,8 +28,8 @@ import pandas as pd
 # -------------------------------
 MODEL_PATH = Path("best.pt")
 
-CONF_THRES      = 0.5
-IOU_THRES       = 0.5
+CONF_THRES      = 0.3
+IOU_THRES       = 0.3
 CAM_INDEX       = 0
 IMG_SIZE        = 320   # KEY: was 640 — cuts inference time ~4x on CPU
 SHOW_FPS        = True

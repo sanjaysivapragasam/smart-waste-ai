@@ -18,7 +18,7 @@ export default function PythonStreamView() {
   useEffect(() => {
     // Connect to Socket.IO server
     console.log("PythonStreamView: Connecting to Socket.IO server...");
-    socketRef.current = io("http://localhost:4000");
+    // socketRef.current = io("http://localhost:4000");
 
     // Listen for connection events
     socketRef.current.on("connect", () => {

@@ -61,6 +61,9 @@ export default function Home() {
         // websocket is preferred and is used for fast real-time comms
         // polling is a fallback in case websocket fails
         transports: ["websocket", "polling"],
+        extraHeaders: {
+          "ngrok-skip-browser-warning": "1",
+        },
       },
     );
 
